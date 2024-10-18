@@ -57,9 +57,10 @@ Convert eBooks to audiobooks with chapters and metadata using Calibre and Coqui 
 
 5. **Install Python packages**:
    ```bash
-   pip install tts==0.21.3 pydub nltk beautifulsoup4 ebooklib tqdm
+   pip install coqui-tts==0.24.2 pydub nltk beautifulsoup4 ebooklib tqdm gradio==4.44.0
    
    python -m nltk.downloader punkt
+   python -m nltk.downloader punkt_tab
    ```
 
    **For non-Latin languages**:
@@ -138,6 +139,8 @@ python app.py --headless True --use_custom_model True --ebook <ebook_file_path> 
 - **<target_voice_file_path>**: Optional for voice cloning.
 - **<language>**: Optional to specify language.
 - **<custom_model_URL_ZIP_path>**: URL Path to zip of Model folder. For Example this for the [xtts_David_Attenborough_fine_tune](https://huggingface.co/drewThomasson/xtts_David_Attenborough_fine_tune/tree/main) `https://huggingface.co/drewThomasson/xtts_David_Attenborough_fine_tune/resolve/main/Finished_model_files.zip?download=true`
+- For a custom model a ref audio clip of the voice will also be needed:
+[ref audio clip of David Attenborough](https://huggingface.co/drewThomasson/xtts_David_Attenborough_fine_tune/blob/main/ref.wav)
 - **[For More Parameters]**: use the `-h` parameter like this `python app.py -h`
 
 ### 🔍 For Detailed Guide with list of all Parameters to use
@@ -407,6 +410,8 @@ To use a custom model, paste the link of the `Finished_model_files.zip` file lik
 
 [David Attenborough fine tuned Finished_model_files.zip](https://huggingface.co/drewThomasson/xtts_David_Attenborough_fine_tune/resolve/main/Finished_model_files.zip?download=true)
 
+For a custom model a ref audio clip of the voice will also be needed:
+[ref audio clip of David Attenborough](https://huggingface.co/drewThomasson/xtts_David_Attenborough_fine_tune/blob/main/ref.wav)
 
 
 
@@ -418,11 +423,23 @@ To find already fine-tuned XTTS models, visit [this Hugging Face link](https://h
 
 ## 🎥 Demos
 
+Rainy day voice
+
 https://github.com/user-attachments/assets/8486603c-38b1-43ce-9639-73757dfb1031
+
+David Attenborough voice
+
+https://github.com/user-attachments/assets/47c846a7-9e51-4eb9-844a-7460402a20a8
+
 
 ## 🤗 [Huggingface space demo](https://huggingface.co/spaces/drewThomasson/ebook2audiobookXTTS)
 - Huggingface space is running on free cpu tier so expect very slow or timeout lol, just don't give it giant files is all
 - Best to duplicate space or run locally.
+
+## Free Google Colab [![Free Google Colab](https://github.com/user-attachments/assets/a8a0d8c8-d605-4f52-a812-d45c779510a9)](https://colab.research.google.com/github/DrewThomasson/ebook2audiobookXTTS/blob/main/Notebooks/colab_ebook2audiobookxtts.ipynb)
+
+
+
 ## 📚 Supported eBook Formats
 
 - `.epub`, `.pdf`, `.mobi`, `.txt`, `.html`, `.rtf`, `.chm`, `.lit`, `.pdb`, `.fb2`, `.odt`, `.cbr`, `.cbz`, `.prc`, `.lrf`, `.pml`, `.snb`, `.cbc`, `.rb`, `.tcr`

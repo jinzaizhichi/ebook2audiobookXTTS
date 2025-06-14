@@ -411,7 +411,7 @@ def math2word(text, lang, lang_iso1, tts_engine):
         text = re.sub(ambiguous_pattern, replace_ambiguous, text)
     # Regex pattern for detecting numbers (handles negatives, commas, decimals, scientific notation)
     number_pattern = r'\s*(-?\d{1,3}(?:,\d{3})*(?:\.\d+(?!\s|$))?(?:[eE][-+]?\d+)?)\s*'
-    if tts_engine == VITS or tts_engine == FAIRSEQ or tts_engine == YOURTTS:
+    if tts_engine in [TACOTRON2, VITS, FAIRSEQ, YOURTTS]:
         if is_num2words_compat:
             # Pattern 2: Split big numbers into groups of 4
             text = re.sub(r'(\d{4})(?=\d{4}(?!\.\d))', r'\1 ', text)
@@ -440,15 +440,16 @@ def normalize_text(text, lang, lang_iso1, tts_engine):
     text = re.sub(r'\b(?:[a-zA-Z]\.){1,}[a-zA-Z]?\b\.?', lambda m: m.group().replace('.', '').upper(), text)
     # Replace ### and [pause] with ‡pause‡ (‡ = double dagger U+2021)
     text = re.sub(r'(###|\[pause\])', '‡pause‡', text)
+    # Replace multiple newlines ("\n\n", "\r\r", "\n\r", etc.) with a ‡pause‡ 1.4sec
+    pattern = r'(?:\r\n|\r|\n){2,}'
+    text = re.sub(pattern, '‡pause‡', text)
+    # Replace single newlines ("\n" or "\r") with spaces
+    text = re.sub(r'\r\n|\r|\n', ' ', text)
     # Replace punctuations causing hallucinations
     pattern = f"[{''.join(map(re.escape, punctuation_switch.keys()))}]"
     text = re.sub(pattern, lambda match: punctuation_switch.get(match.group(), match.group()), text)
     # Replace NBSP with a normal space
     text = text.replace("\xa0", " ")
-    # Replace multiple newlines ("\n\n", "\r\r", "\n\r", etc.) with a ‡pause‡ 2sec
-    text = re.sub(r'(\r\n|\r|\n)+', '‡pause‡', text)
-    # Replace single newlines ("\n" or "\r") with spaces
-    text = re.sub(r'[\r\n]', ' ', text)
     # Replace multiple  and spaces with single space
     text = re.sub(r'[     ]+', ' ', text)
     # Replace ok by 'Owkey'
@@ -688,12 +689,15 @@ def filter_chapter(doc, lang, lang_iso1, tts_engine):
                         text_array.append(line)
             elif tag.name == "p" and tag.find_parent("table"):
                 continue  # Already handled in the <table> section
+            elif tag.name == "p" and "whitespace" in (tag.get("class") or []):
+                if tag.get_text(strip=True) == '\xa0' or not tag.get_text(strip=True):
+                    text_array.append("[pause]")
             elif tag.name in ["h1", "h2", "h3", "h4", "h5", "h6"]:
                 raw_text = tag.get_text(strip=True)
                 if raw_text:
                     # replace roman numbers by digits
                     raw_text = replace_roman_numbers(raw_text, lang)
-                    text_array.append(f'— "{raw_text}". ‡pause‡')
+                    text_array.append(f'{raw_text}.[pause]')
             else:
                 raw_text = tag.get_text(strip=True)
                 if raw_text:
@@ -2148,6 +2152,8 @@ def web_interface(args):
                 rating = default_xtts_settings['rating']
             elif tts_engine == BARK:
                 rating = default_bark_settings['rating']
+            elif tts_engine == TACOTRON2:
+                rating = default_tacotron_settings['rating']
             elif tts_engine == VITS:
                 rating = default_vits_settings['rating']
             elif tts_engine == FAIRSEQ:
